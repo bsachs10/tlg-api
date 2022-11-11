@@ -1,1 +1,0 @@
-function enableDownloadLinkselements = document.getElementsByClassName('someClass');

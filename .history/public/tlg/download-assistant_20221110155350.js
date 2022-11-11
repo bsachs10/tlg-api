@@ -1,1 +1,0 @@
-elements = document.getElementsByClassName('someClass');

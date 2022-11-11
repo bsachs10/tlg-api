@@ -1,28 +1,35 @@
 function enableDownloadLinks() {
-    Array.from(document.querySelectorAll('.downloader-link:not(.downloader-link-enabled)')).map( el => {
+    Array.from(document.querySelectorAll('a[data-dl-title]:not(.downloader-link-enabled)')).map( el => {
         el.classList.add('downloader-link-enabled');
+        const url = el.getAttribute('href');
+        const title = el.getAttribute('data-dl-title');
         el.addEventListener('click', function(event) {
             event.preventDefault();
-            openModal(el.dataset);
+            openModal({url, title});
         })
-        console.log(`Enabled DL link for "${el.dataset['title']}"`);
+        el.removeAttribute('href');
+        console.log(`Enabled DL link for "${el.getAttribute('data-dl-title') }"`);
         
     });
 
 }
 
 
-async function handleEmail({title, filename, url, email}) {
-   
-    const response = fetch('/.netlify/functions/send-download-link', {
+async function handleEmail({title, url, email}) {
+
+        const response = fetch('/.netlify/functions/send-download-link', {
         method: 'POST',
-        body: JSON.stringify({ title, filename, url, email })
+        body: JSON.stringify({ 
+            url,
+            title, 
+            email 
+        })
     })
         .then(async response => {
             if (response.ok) {
                 document.getElementById('dl-form').style.display = 'none';
                 document.getElementById('dl-success').style.display = 'block';
-                console.log('response.json()', await response.json());
+                // console.log('response.json()', await response.json());
             } else {
                 document.getElementById('dl-form').style.display = 'none';
                 document.getElementById('dl-error').style.display = 'block';
@@ -39,7 +46,7 @@ async function handleEmail({title, filename, url, email}) {
 
  
 
-function openModal({title, filename, url}) {
+function openModal({title, url}) {
 
     if (document.getElementById('dl-modal')) {
         document.getElementById('dl-modal').remove();
@@ -149,9 +156,7 @@ function openModal({title, filename, url}) {
 
     const exits = modal.querySelectorAll(".dl-modal-exit");
     exits.forEach(function (exit) {
-        console.log('exit', exit)
         exit.addEventListener("click", function (event) {
-            console.log('exiting!', exit)
             event.preventDefault();
             modal.classList.remove("open");
         });
@@ -166,9 +171,8 @@ function openModal({title, filename, url}) {
                 document.getElementById('dl-email').classList.remove('invalid');
             }, { once: true });
         } else {
-            handleEmail({ title, filename, url, email });
+            handleEmail({ title, url, email });
         }
-        console.log(document.getElementById('dl-email').value)
     });
 
 
@@ -183,6 +187,17 @@ const validateEmail = (email) => {
         .match(
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         );
+};
+
+const LinkEncoder = {
+    encode: ({ title, email, url }) => {
+        const encoderFunc = typeof (buf) !== 'undefined' && buf.toString || btoa;
+        return encodeURIComponent(encoderFunc(JSON.stringify({ title, email, url })));
+    },
+    decode: (encodedString) => {
+        const decoderFunc = typeof (abuf) !== 'undefined' && abuf.toString || atob;
+        return (JSON.parse(decoderFunc(decodeURIComponent(encodedString))));
+    }
 };
 
 enableDownloadLinks();
