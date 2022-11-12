@@ -2,7 +2,7 @@
     <body>
         <script src="./download-assistant.js"></script>
         <script>
-            window.TLG_API_HOST = 'https://amazing-frangipane-c22ea7.netlify.app';
+            window.TLG_API_HOST = 'http://localhost:8888';
         </script>
 <h1>Hello</h1>
 
@@ -17,7 +17,7 @@
 <script>
 
     function countDownload({url, title, email}) {
-        const response = fetch(window.TLG_API_HOST +'https://api.thelandinggroup.com/.netlify/functions/count-download', {
+        const response = fetch(window.TLG_API_HOST +'/.netlify/functions/count-download', {
             method: 'POST',
             body: JSON.stringify({
                 url,

@@ -16,24 +16,16 @@ exports.handler = async function (event, context) {
 
             await recordDownloadRequest({ url, title, email });
             console.log('Success!')
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ message: 'Success!' }),
-            };        
+            return respondWith('Success'); 
 
-        } catch (e) {
-            logError('Error logging download request to Google Sheet', e);
-            return {
-                statusCode: 200,
-                body: JSON.stringify({ message: 'Email sent, but not logged', error: e }),
-            };
+        } catch (error) {
+            logError('Error logging download request to Google Sheet', error);
+            respondWith({ message: 'Email sent, but not logged', error });
+            
         }
-    } catch (e) {
-        logError('Error sending email', e);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Email could not be sent', error: e }),
-        };
+    } catch (error) {
+        logError('Error sending email', error);
+        respondWith({ message: 'Email could not be sent', error }, 500);
     }
 
    
@@ -135,3 +127,16 @@ function getCurrentDateAndTimeFormattedForGoogleSheets() {
     dayjs.tz.setDefault("America/New_York");
     return dayjs().tz("America/New_York").format("M/D/YY H:m:s");
 };
+
+
+const respondWith = (body, statusCode = 200) => {
+    return {
+        statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET, POST, OPTION",
+        },
+        body: JSON.stringify(typeof (body) === 'string' ? { message: body } : body)
+    };
+}

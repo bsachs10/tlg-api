@@ -5,23 +5,18 @@ var utc = require('dayjs/plugin/utc')
 var timezone = require('dayjs/plugin/timezone') // dependent on utc plugin
 
 
+
 exports.handler = async function (event, context) {
     const { url, title, email } = JSON.parse(event.body);
     try {
 
         await recordDownload({ url, title, email });
         console.log('Success!');
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Success!' }),
-        };
+        return respondWith('Success!');
 
     } catch (e) {
         logError('Error logging download request to Google Sheet', e);
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Could not log download', error: e }),
-        };
+        return respondWith({ message: 'Could not log download', error: e });
     }
 
 
@@ -81,3 +76,15 @@ function getCurrentDateAndTimeFormattedForGoogleSheets() {
     return dayjs().tz("America/New_York").format("M/D/YY H:m:s");
 };
 
+
+const respondWith = (body, statusCode = 200) => {
+    return {
+        statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET, POST, OPTION",
+        },
+        body: JSON.stringify(typeof (body) === 'string' ? { message: body } : body)
+    };
+}
