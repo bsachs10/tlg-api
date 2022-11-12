@@ -73,7 +73,7 @@ function sendEmail({ url, title, email }) {
 
     console.log('email', emailPayload);
 
-    // return Promise.resolve(emailPayload);
+    return Promise.resolve(emailPayload);
     // return Promise.reject('Fake Error');
     return client.sendEmailWithTemplate(emailPayload);
 
@@ -88,6 +88,8 @@ async function appendGoogleSheet(sheet, dataInRows, spreadsheetId = "15gByrg3FKL
 
     });
     const sheets = google.sheets({ version: 'v4', auth });
+
+    console.log('dataInRows', dataInRows);
 
     return await sheets.spreadsheets.values.append({
         spreadsheetId,
