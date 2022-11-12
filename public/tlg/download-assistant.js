@@ -23,6 +23,8 @@ async function handleEmail({title, url, email}, submitButton) {
     const oldSubmitText = submitButton.value;
     submitButton.value = 'Working...';
 
+    setWithExpiry('email', email);
+
     const response = fetch(window.TLG_API_HOST+'/.netlify/functions/send-download-link', {
         method: 'POST',
         body: JSON.stringify({ 
@@ -56,6 +58,25 @@ async function handleEmail({title, url, email}, submitButton) {
         });
 };
 
+function setWithExpiry(key, value, ttl) {
+    const now = new Date();
+    ttl = ttl || 1000*60 * 60 * 24 * 14; /* two weeks */
+    const item = { value, expiry: now.getTime() + ttl};
+    localStorage.setItem(key, JSON.stringify(item));
+};
+
+function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key);
+    /* if the item doesn't exist, return null */
+    if (!itemStr) return null;
+    const item = JSON.parse(itemStr);
+    /* compare the expiry time of the item with the current time */
+    if ((new Date()).getTime() > item.expiry) {
+        localStorage.removeItem(key);
+        return null;
+    }
+    return item.value;
+};
  
 
 const openModal = function ({title, url}) {
@@ -63,6 +84,8 @@ const openModal = function ({title, url}) {
     if (document.getElementById('dl-modal')) {
         document.getElementById('dl-modal').remove();
     }
+
+    const storedEmail = getWithExpiry('email') || '';
 
     const innerHTML = `
     <div class="dl-modal-bg dl-modal-exit"></div>
@@ -84,7 +107,7 @@ const openModal = function ({title, url}) {
             
             <div class="field-list clear sqs-block-newsletter">
                 <div class="dl-email-container form-item field email required">
-                    <input id="dl-email" class="dl-email" name="email" type="email" autocomplete="email" spellcheck="false" aria-required="true" placeholder="Email Address">
+                    <input id="dl-email" class="dl-email" name="email" type="email" autocomplete="email" spellcheck="false" aria-required="true" placeholder="Email Address" value="${storedEmail}">
                 </div>
                 <div data-animation-role="button" class="form-button-wrapper form-button-wrapper--align-left">
                     <input id="dl-submit" class="dl-submit btn btn--border theme-btn--primary-inverse sqs-button-element--primary" value="Send to my inbox" type="submit">

@@ -12,6 +12,7 @@ exports.handler = async function (event, context) {
     const { url, title, email, isMobile } = JSON.parse(event.body);
     const IP = event.headers['x-nf-client-connection-ip'];
     console.log('Request from ' + IP);
+
     try {
         await sendEmail({url, title, email});
 

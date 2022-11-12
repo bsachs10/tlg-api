@@ -36,9 +36,7 @@
                 console.error('Error', error);
             })
             .finally(() => {
-                setTimeout(() => {
-                    location.href = url;
-                }, 1000);
+                location.href = url;
             })
             ;
         }
@@ -47,7 +45,7 @@
         const {title, email, url} = LinkEncoder.decode(new URLSearchParams(window.location.search).get('data'));
         countDownload({ title, email, url });
         
-        document.write(`<div class=manual-download>You are being redircted now. If nothing happens, <a href="${url}">click here to continue</a>.</div>`)
+        document.write(`<div class=manual-download>Your download should start in a few seconds. If it doesn't, <a href="${url}">click here</a>.</div>`)
     } catch (e) {
         console.error(e);
         document.write('Your download link appears to be broken. Please check your email and make sure you have use the link provided to you without alteration.');

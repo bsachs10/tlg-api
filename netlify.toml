@@ -3,3 +3,7 @@
   for = "/*"
     [headers.values]
     Access-Control-Allow-Origin = "*"
+
+[dev]
+    autoLaunch = false
+    port = 3001
