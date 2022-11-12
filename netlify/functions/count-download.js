@@ -74,10 +74,12 @@ function createArrayForGoogleSheetTracking({ email, title, url }) {
 
 
 function getCurrentDateAndTimeFormattedForGoogleSheets() {
-    dayjs.extend(utc)
-    dayjs.extend(timezone)
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
     dayjs.tz.setDefault("America/New_York");
-    return dayjs().format("M/D/YY H:m:s");
+    const str = dayjs().tz("America/New_York").format("M/D/YY H:m:s");
+    console.log('DATE', str);
+    return str;
 
 };
 
