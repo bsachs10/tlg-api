@@ -10,6 +10,7 @@ exports.handler = async function (event, context) {
     try {
 
         await recordDownload({ url, title, email });
+        console.log('Success!');
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Success!' }),
