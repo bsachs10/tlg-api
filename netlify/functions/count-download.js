@@ -56,7 +56,7 @@ async function recordDownload({ email, title, url, IP }) {
 
 }
 
-function createArrayForGoogleSheetTracking({ email, title, ur, IP }) {
+function createArrayForGoogleSheetTracking({ email, title, url, IP }) {
     // Timestamp, Email, IP, Title,	URL, Hash, Action
     return [[
         getCurrentDateAndTimeFormattedForGoogleSheets(),
