@@ -22,28 +22,32 @@ exports.handler = async function (event, context) {
                 await addSubscriberToMailChimp(email);
                 return respondWith('Success'); 
             } catch(error) {
-                logError('Email sent and logged to Sheets, but error sending to MC', error);
+                await logError('Email sent and logged to Sheets, but error sending to MC', error);
                 return respondWith({ message: 'Email sent and logged, but not added to MC', error });
             }
 
             
         } catch (error) {
-            logError('Error logging download request to Google Sheet', error);
+            await logError('Error logging download request to Google Sheet', error);
             return respondWith({ message: 'Email sent, but not logged', error });
             
         }
     } catch (error) {
-        logError('Error sending email', error);
+        await logError('Error sending email', error);
         return respondWith({ message: 'Email could not be sent', error }, 500);
     }
 
    
 }
 
-function logError(msg, data) {
+async function logError(msg, data) {
     console.error(msg, data);
     // Timestamp, Type, Description, Details
-    appendGoogleSheet('log', [[getCurrentDateAndTimeFormattedForGoogleSheets(), 'ERROR', msg, JSON.stringify(data)]])
+    try {
+        return appendGoogleSheet('log', [[getCurrentDateAndTimeFormattedForGoogleSheets(), 'ERROR', msg, JSON.stringify(data)]])
+    } catch (error) {
+        console.error('ERROR when trying to log error to Google Sheets', error);
+    }
 }
 
 function getProxyUrl({ title, url, email }) {

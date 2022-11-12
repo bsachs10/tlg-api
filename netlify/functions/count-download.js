@@ -16,17 +16,22 @@ exports.handler = async function (event, context) {
         return respondWith('Success');
 
     } catch (e) {
-        logError('Error logging download request to Google Sheet', e);
+        await logError('Error logging download request to Google Sheet', e);
         return respondWith({ message: 'Could not log download', error: e });
     }
 
 
 }
 
-function logError(msg, data) {
+async function logError(msg, data) {
     console.error(msg, data);
     // Timestamp, Type, Description, Details
-    appendGoogleSheet('log', [[getCurrentDateAndTimeFormattedForGoogleSheets(), 'ERROR', msg, JSON.stringify(data)]])
+    try {
+        return appendGoogleSheet('log', [[getCurrentDateAndTimeFormattedForGoogleSheets(), 'ERROR', msg, JSON.stringify(data)]])
+    } catch (error) {
+        console.error('ERROR when trying to log error to Google Sheets', error);
+    }
+
 }
 
 
