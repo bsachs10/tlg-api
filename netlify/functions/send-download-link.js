@@ -137,7 +137,7 @@ async function addSubscriberToMailChimp(email) {
         tags: [tagName]
     });
 
-    console.log(response);
+    // console.log(response.json());
 
     return response;
 
