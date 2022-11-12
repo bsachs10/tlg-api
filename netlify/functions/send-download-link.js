@@ -125,8 +125,11 @@ const LinkEncoder = {
     }
 };
 
-function getCurrentDateAndTimeFormattedForGoogleSheets() {
-    const date = new Date();
-    return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-};
 
+function getCurrentDateAndTimeFormattedForGoogleSheets() {
+    dayjs.extend(utc)
+    dayjs.extend(timezone)
+    dayjs.tz.setDefault("America/New_York");
+    return dayjs().format("M/D/YY H:m:s");
+
+};

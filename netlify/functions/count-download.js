@@ -1,5 +1,8 @@
 const { google } = require("googleapis");
 const md5 = require("blueimp-md5");
+const dayjs = require('dayjs')
+var utc = require('dayjs/plugin/utc') 
+var timezone = require('dayjs/plugin/timezone') // dependent on utc plugin
 
 
 exports.handler = async function (event, context) {
@@ -71,7 +74,10 @@ function createArrayForGoogleSheetTracking({ email, title, url }) {
 
 
 function getCurrentDateAndTimeFormattedForGoogleSheets() {
-    const date = new Date();
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    dayjs.extend(utc)
+    dayjs.extend(timezone)
+    dayjs.tz.setDefault("America/New_York");
+    return dayjs().format("M/D/YY H:m:s");
+
 };
 
