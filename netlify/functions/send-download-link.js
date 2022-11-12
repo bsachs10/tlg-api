@@ -15,6 +15,7 @@ exports.handler = async function (event, context) {
         try {
 
             await recordDownloadRequest({ url, title, email });
+            console.log('Success!')
             return {
                 statusCode: 200,
                 body: JSON.stringify({ message: 'Success!' }),
@@ -71,9 +72,9 @@ function sendEmail({ url, title, email }) {
 
     console.log('email', emailPayload);
 
-    return Promise.resolve(emailPayload);
+    // return Promise.resolve(emailPayload);
     // return Promise.reject('Fake Error');
-    // return client.sendEmailWithTemplate(emailPayload);
+    return client.sendEmailWithTemplate(emailPayload);
 
 }
     
