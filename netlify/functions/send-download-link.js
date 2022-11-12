@@ -13,9 +13,7 @@ exports.handler = async function (event, context) {
         await sendEmail({url, title, email});
 
         try {
-
             await recordDownloadRequest({ url, title, email });
-            console.log('Success!')
             return respondWith('Success'); 
 
         } catch (error) {
@@ -130,6 +128,7 @@ function getCurrentDateAndTimeFormattedForGoogleSheets() {
 
 
 const respondWith = (body, statusCode = 200) => {
+    console.log(statusCode + ' RESPONSE', body);
     return {
         statusCode: 200,
         headers: {
