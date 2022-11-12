@@ -1,5 +1,7 @@
 const postmark = require("postmark");
 const { google } = require("googleapis");
+const mailchimp = require("@mailchimp/mailchimp_marketing");
+
 const md5 = require("blueimp-md5");
 const dayjs = require('dayjs')
 var utc = require('dayjs/plugin/utc')
@@ -15,16 +17,24 @@ exports.handler = async function (event, context) {
 
         try {
             await recordDownloadRequest({ url, title, email, IP, isMobile });
-            return respondWith('Success'); 
 
+            try {
+                await addSubscriberToMailChimp(email);
+                return respondWith('Success'); 
+            } catch(error) {
+                logError('Email sent and logged to Sheets, but error sending to MC', error);
+                return respondWith({ message: 'Email sent and logged, but not added to MC', error });
+            }
+
+            
         } catch (error) {
             logError('Error logging download request to Google Sheet', error);
-            respondWith({ message: 'Email sent, but not logged', error });
+            return respondWith({ message: 'Email sent, but not logged', error });
             
         }
     } catch (error) {
         logError('Error sending email', error);
-        respondWith({ message: 'Email could not be sent', error }, 500);
+        return respondWith({ message: 'Email could not be sent', error }, 500);
     }
 
    
@@ -63,7 +73,7 @@ function sendEmail({ url, title, email }) {
 
     console.log('email', emailPayload);
 
-    // return Promise.resolve(emailPayload);
+    return Promise.resolve(emailPayload);
     // return Promise.reject('Fake Error');
     return client.sendEmailWithTemplate(emailPayload);
 
@@ -108,6 +118,29 @@ function createArrayForGoogleSheetTracking({ email, title, url, IP, isMobile }) 
         md5(JSON.stringify({email, title, url})),
         'REQUEST'
     ]];
+}
+
+async function addSubscriberToMailChimp(email) {
+    
+    const listId = '2570b44922';
+    // Tags {1853: tlg-website-newsletter-signup, 1854: all-rise-sneak-peak, 1864: all-rise-toolkit-download }
+    const tagName = 'all-rise-toolkit-download';
+    
+    mailchimp.setConfig({
+        apiKey: process.env.MAILCHIMP_API_KEY,
+        server: "us21",
+    });
+
+    const response = await mailchimp.lists.addListMember(listId, {
+        email_address: email,
+        status: "subscribed",
+        tags: [tagName]
+    });
+
+    console.log(response);
+
+    return response;
+
 }
 
 
