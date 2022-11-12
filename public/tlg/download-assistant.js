@@ -28,7 +28,8 @@ async function handleEmail({title, url, email}, submitButton) {
         body: JSON.stringify({ 
             url,
             title, 
-            email 
+            email, 
+            isMobile: ("ontouchstart" in document.documentElement)
         })
     })
         .then(async response => {
