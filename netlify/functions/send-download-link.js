@@ -8,12 +8,13 @@ var timezone = require('dayjs/plugin/timezone') // dependent on utc plugin
 
 exports.handler = async function (event, context) {
     const { url, title, email } = JSON.parse(event.body);
+    const IP = event.headers['client-ip'];
 
     try {
         await sendEmail({url, title, email});
 
         try {
-            await recordDownloadRequest({ url, title, email });
+            await recordDownloadRequest({ url, title, email, IP });
             return respondWith('Success'); 
 
         } catch (error) {
@@ -89,17 +90,18 @@ async function appendGoogleSheet(sheet, dataInRows, spreadsheetId = "15gByrg3FKL
 
 }
 
-async function recordDownloadRequest({ email, title, url }) {
+async function recordDownloadRequest({ email, title, url, IP }) {
     
-    return await appendGoogleSheet("download_tracking", createArrayForGoogleSheetTracking({ email, title, url }))
+    return await appendGoogleSheet("download_tracking", createArrayForGoogleSheetTracking({ email, title, url, IP }))
 
 }
 
-function createArrayForGoogleSheetTracking({email, title, url}) {
-    // Timestamp, Email, Title,	URL, Hash, Action
+function createArrayForGoogleSheetTracking({email, title, url, IP}) {
+    // Timestamp, Email, IP, Title,	URL, Hash, Action
     return [[
         getCurrentDateAndTimeFormattedForGoogleSheets(),
         email,
+        IP,
         title,
         url,
         md5(JSON.stringify({email, title, url})),
