@@ -1,0 +1,59 @@
+<html>
+    <body>
+        <script src="./download-assistant.js"></script>
+        <script>
+            window.TLG_API_HOST = 'https://amazing-frangipane-c22ea7.netlify.app';
+        </script>
+<h1>Hello</h1>
+
+<style>
+    .manual-download {
+        color: gray; 
+        font-style: italic;
+        margin-top: 2em;
+        text-align: center;
+    }
+</style>
+<script>
+
+    function countDownload({url, title, email}) {
+        const response = fetch(window.TLG_API_HOST +'https://api.thelandinggroup.com/.netlify/functions/count-download', {
+            method: 'POST',
+            body: JSON.stringify({
+                url,
+                title,
+                email
+            })
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    console.error('Response not OK', await response.json());
+                }
+
+            })
+            .catch(async error => {
+                console.error('Error', error);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    location.href = url;
+                }, 1000);
+            })
+            ;
+        }
+
+    try {
+        const {title, email, url} = LinkEncoder.decode(new URLSearchParams(window.location.search).get('data'));
+        countDownload({ title, email, url });
+        
+        document.write(`<div class=manual-download>You are being redircted now. If nothing happens, <a href="${url}">click here to continue</a>.</div>`)
+    } catch (e) {
+        console.error(e);
+        document.write('Your download link appears to be broken. Please check your email and make sure you have use the link provided to you without alteration.');
+    }
+
+
+</script>
+
+</body>
+</html>

@@ -1,4 +1,6 @@
-function enableDownloadLinks() {
+/* Minifier: https://www.willpeavy.com/tools/minifier/ */
+
+const enableDownloadLinks = function() {
     Array.from(document.querySelectorAll('a[data-dl-title]:not(.downloader-link-enabled)')).map( el => {
         el.classList.add('downloader-link-enabled');
         const url = el.getAttribute('href');
@@ -6,18 +8,22 @@ function enableDownloadLinks() {
         el.addEventListener('click', function(event) {
             event.preventDefault();
             openModal({url, title});
-        })
+        });
         el.removeAttribute('href');
         console.log(`Enabled DL link for "${el.getAttribute('data-dl-title') }"`);
         
     });
 
-}
+};
 
 
-async function handleEmail({title, url, email}) {
+async function handleEmail({title, url, email}, submitButton) {
 
-        const response = fetch('/.netlify/functions/send-download-link', {
+    submitButton.disabled = true;
+    const oldSubmitText = submitButton.value;
+    submitButton.value = 'Working...';
+
+    const response = fetch(window.TLG_API_HOST+'/.netlify/functions/send-download-link', {
         method: 'POST',
         body: JSON.stringify({ 
             url,
@@ -29,7 +35,7 @@ async function handleEmail({title, url, email}) {
             if (response.ok) {
                 document.getElementById('dl-form').style.display = 'none';
                 document.getElementById('dl-success').style.display = 'block';
-                // console.log('response.json()', await response.json());
+                /* console.log('response.json()', await response.json()); */
             } else {
                 document.getElementById('dl-form').style.display = 'none';
                 document.getElementById('dl-error').style.display = 'block';
@@ -41,12 +47,17 @@ async function handleEmail({title, url, email}) {
             document.getElementById('dl-form').style.display = 'none';
             document.getElementById('dl-error').style.display = 'block';   
             console.error('Error', error);
+        })
+        .finally( () => {
+            submitButton.disabled = false;
+            submitButton.value = oldSubmitText;
+
         });
-}
+};
 
  
 
-function openModal({title, url}) {
+const openModal = function ({title, url}) {
 
     if (document.getElementById('dl-modal')) {
         document.getElementById('dl-modal').remove();
@@ -102,6 +113,12 @@ function openModal({title, url}) {
         input.dl-submit {
             width: 100%;
         }
+        input.dl-submit[disabled] {
+            background-color: #c7c6c6;
+            color: #666;
+            border-color: #c7c6c6;
+        }
+        
         .dl-modal {
             z-index: 99999;
             position: fixed;
@@ -171,7 +188,7 @@ function openModal({title, url}) {
                 document.getElementById('dl-email').classList.remove('invalid');
             }, { once: true });
         } else {
-            handleEmail({ title, url, email });
+            handleEmail({ title, url, email }, event.target);
         }
     });
 
@@ -179,7 +196,7 @@ function openModal({title, url}) {
     document.getElementById('dl-modal').classList.add("open");
 
     
-}
+};
 
 const validateEmail = (email) => {
     return String(email)

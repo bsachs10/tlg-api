@@ -1,0 +1,133 @@
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script> -->
+
+
+<!-- Begin Mailchimp Signup Form -->
+<style>
+    .mce_inline_error {
+        position: absolute;
+        text-align: center;
+    }
+
+</style>
+<div class="sqs-block sqs-block-newsletter newsletter-block mc_embed_signup">
+    <div class="sqs-block-content">
+        <div class="newsletter-form-wrapper newsletter-form-wrapper--layoutFloat newsletter-form-wrapper--alignCenter">
+
+            <form
+                action="https://thelandinggroup.us21.list-manage.com/subscribe/post-json?u=4af140fb53bad57b9dfc257e5&id=2570b44922&f_id=00b9c0e1f0"
+                method="post" name="mc-embedded-subscribe-form"
+                class="validate newsletter-form mc-embedded-subscribe-form" target="_blank"
+                style="text-align: left"
+                >
+                
+                <div class="newsletter-form-body" id="mc_embed_signup_scroll">
+                    <div class="newsletter-form-fields-wrapper form-fields"
+                        style="vertical-align: middle; margin-top: 1rem;">
+
+
+
+                        <div id="email-yui_3_17_2_1_1668213367275_1039"
+                            class="newsletter-form-field-wrapper form-item field email required mc-field-group"
+                            style="vertical-align: bottom;">
+                            <label class="newsletter-form-field-label title"
+                                for="email-yui_3_17_2_1_1668213367275_1039-field">Email Address</label>
+                            <input id="mce-EMAIL" class="newsletter-form-field-element field-element" name="EMAIL"
+                                x-autocompletetype="email" autocomplete="email" type="email" spellcheck="false"
+                                placeholder="Email Address">
+                            <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+                        </div>
+
+                        <!-- Tags {1853: tlg-website-newsletter-signup, 1854: all-rise-sneak-peak} -->
+                        <div hidden="true"><input type="hidden" name="tags" value="1853"></div>
+
+
+                    </div>
+                    <div data-animation-role="button"
+                        class="newsletter-form-button-wrapper submit-wrapper preFade fadeIn"
+                        style="vertical-align: middle; transition-timing-function: ease; transition-duration: 0.45s; transition-delay: 0.389189s;">
+                        <button id="mc-embedded-subscribe" class="
+            newsletter-form-button
+            sqs-system-button
+            sqs-editable-button-layout
+            sqs-editable-button-style
+            sqs-editable-button-shape
+            sqs-button-element--primary
+          " type="submit" value="Sign Up">
+                            <span class="newsletter-form-spinner sqs-spin light large"></span>
+                            <span class="newsletter-form-button-label">Sign Up</span>
+                            <span class="newsletter-form-button-icon"></span>
+                        </button>
+                    </div>
+
+                    <div class="model"></div>
+
+
+                </div>
+
+                <!-- Mailchimp Error Messages -->
+                <div id="mce-responses" class="clear">
+                    <div class="response mce-error-response" style="display:none"></div>
+                    <div class="response mce-success-response" style="display:none"></div>
+                </div>
+                <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text"
+                        name="b_4af140fb53bad57b9dfc257e5_2570b44922" tabindex="-1" value=""></div>
+                <!-- End Mailchimp Error Messages -->
+
+                <div class="newsletter-form-footnote">
+                    <p class="preFade fadeIn"
+                        style="transition-timing-function: ease; transition-duration: 0.45s; transition-delay: 0.405405s;">
+                        We respect your privacy.</p>
+                </div>
+                <div class="hidden form-submission-text">Thank you!</div>
+                <div class="hidden form-submission-html" data-submission-html=""></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 
+<script type='text/javascript' src='//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js'></script>
+<script
+    type='text/javascript'>(function ($) { window.fnames = new Array(); window.ftypes = new Array(); fnames[0] = 'EMAIL'; ftypes[0] = 'email'; fnames[1] = 'FNAME'; ftypes[1] = 'text'; fnames[2] = 'LNAME'; ftypes[2] = 'text'; fnames[3] = 'ADDRESS'; ftypes[3] = 'address'; fnames[4] = 'PHONE'; ftypes[4] = 'phone'; fnames[5] = 'BIRTHDAY'; ftypes[5] = 'birthday'; }(jQuery)); var $mcj = jQuery.noConflict(true);</script> -->
+
+
+
+
+<script type="text/javascript">
+
+    // Set up form variables
+    var mailchimpForm = $('.mc-embedded-subscribe-form');
+    mailchimpForm.submit(function (e) {
+
+        e.preventDefault();
+
+        // Set variables for this specific form
+        var that = $(this);
+        var mailchimpSubmit = $(this).find('input[type=submit]');
+        var errorResponse = $(this).closest('.mc_embed_signup').find('.mce-error-response');
+        var successResponse = $(this).closest('.mc_embed_signup').find('.mce-success-response');
+
+        $.ajax({
+            method: 'GET',
+            url: that.attr('action'),
+            data: that.serialize(),
+            dataType: 'jsonp',
+            jsonp: 'c',
+            success: function (data) {
+                console.log('DATA', data)
+                // If there was an error then show the error message.
+                if (data.result === 'error') {
+                    // If the error has an error code at front then alter the message to not include the error code and hyphen.
+                    if (data.msg.indexOf('0') === 0) {
+                        data.msg = data.msg.slice(3);
+                    }
+                    errorResponse.html(data.msg).fadeIn(300).delay(3000).fadeOut(300);
+                } else {
+                    successResponse.html('Success! Thanks for signing up.').fadeIn(300).delay(3000).fadeOut(300);
+                }
+            }
+        });
+    });
+</script>
+<!--End mc_embed_signup-->
