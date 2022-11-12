@@ -9,6 +9,7 @@ var timezone = require('dayjs/plugin/timezone') // dependent on utc plugin
 exports.handler = async function (event, context) {
     const { url, title, email, isMobile } = JSON.parse(event.body);
     const IP = event.headers['client-ip'];
+    console.log('IP', IP);
     try {
 
         await recordDownload({ url, title, email, IP, isMobile });
