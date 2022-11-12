@@ -77,9 +77,6 @@ function getCurrentDateAndTimeFormattedForGoogleSheets() {
     dayjs.extend(utc);
     dayjs.extend(timezone);
     dayjs.tz.setDefault("America/New_York");
-    const str = dayjs().tz("America/New_York").format("M/D/YY H:m:s");
-    console.log('DATE', str);
-    return str;
-
+    return dayjs().tz("America/New_York").format("M/D/YY H:m:s");
 };
 

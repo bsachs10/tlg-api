@@ -125,11 +125,9 @@ const LinkEncoder = {
     }
 };
 
-
 function getCurrentDateAndTimeFormattedForGoogleSheets() {
-    dayjs.extend(utc)
-    dayjs.extend(timezone)
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
     dayjs.tz.setDefault("America/New_York");
-    return dayjs().format("M/D/YY H:m:s");
-
+    return dayjs().tz("America/New_York").format("M/D/YY H:m:s");
 };
