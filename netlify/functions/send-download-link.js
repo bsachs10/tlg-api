@@ -75,7 +75,7 @@ function sendEmail({ url, title, email }) {
         }
     };
 
-    console.log('email', emailPayload);
+    // console.log('email', emailPayload);
 
     // return Promise.resolve(emailPayload);
     // return Promise.reject('Fake Error');
