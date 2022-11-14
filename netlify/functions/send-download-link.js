@@ -16,28 +16,28 @@ exports.handler = async function (event, context) {
     try {
         await sendEmail({url, title, email});
 
-        try {
-            await recordDownloadRequest({ url, title, email, IP, isMobile });
-
-            try {
-                await addSubscriberToMailChimp(email);
-                return respondWith('Success'); 
-            } catch(error) {
-                await logError('Email sent and logged to Sheets, but error sending to MC', error);
-                return respondWith({ message: 'Email sent and logged, but not added to MC', error });
-            }
-
-            
-        } catch (error) {
-            await logError('Error logging download request to Google Sheet', error);
-            return respondWith({ message: 'Email sent, but not logged', error });
-            
+        const [resultofRecordDownloadRequest, resultOfAddSubscriberToMailChimp] = await Promise.all([
+                recordDownloadRequest({ url, title, email, IP, isMobile }).then(result => ({ result })).catch(error => ({ error })),
+                addSubscriberToMailChimp(email).then(result => ({ result })).catch(error => ({ error }))
+            ]);
+        let errors = [];
+        if (resultofRecordDownloadRequest.error) {
+            errors.push({message: 'Error logging download request to Google Sheet', error: resultofRecordDownloadRequest.error});
         }
+        if (resultOfAddSubscriberToMailChimp.error) {
+            errors.push({ message: 'Error sending to MC', error: resultOfAddSubscriberToMailChimp.error});
+        }
+        if (errors.length) {
+            await logError('Email sent but other errors occured', errors)
+            return respondWith({message: 'Email sent but other errors occured', errors}); 
+        } else {
+            return respondWith('Success'); 
+        }
+                
     } catch (error) {
         await logError('Error sending email', error);
         return respondWith({ message: 'Email could not be sent', error }, 500);
     }
-
    
 }
 
@@ -78,7 +78,7 @@ function sendEmail({ url, title, email }) {
 
     // console.log('email', emailPayload);
 
-    // return Promise.resolve(emailPayload);
+    return Promise.resolve(emailPayload);
     // return Promise.reject('Fake Error');
     return client.sendEmailWithTemplate(emailPayload);
 
@@ -138,11 +138,15 @@ async function addSubscriberToMailChimp(email) {
         server: "us21",
     });
 
-    const response = await mailchimp.lists.addListMember(listId, {
-        email_address: email,
-        status: "subscribed",
-        tags: [tagName]
-    });
+    const response = await mailchimp.lists.setListMember(
+        listId, 
+        md5(email.toLowerCase()),
+        {
+            email_address: email,
+            status_if_new: "subscribed",
+            tags: [tagName]
+        }
+    );
 
     // console.log(response.json());
 
@@ -173,7 +177,7 @@ function getCurrentDateAndTimeFormattedForGoogleSheets() {
 const respondWith = (body, statusCode = 200) => {
     console.log(statusCode + ' RESPONSE', body);
     return {
-        statusCode: 200,
+        statusCode,
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "Content-Type",
