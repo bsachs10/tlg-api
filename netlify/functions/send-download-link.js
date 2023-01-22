@@ -190,7 +190,7 @@ async function addSubscriberToHubspot({email, title}) {
     if (getContactRequest.statusText === 'OK') {
         console.log('Updating existing Hubspot record with new download');
         const existingContact = await getContactRequest.json();
-        const website_file_download = existingContact.properties.website_file_download ? existingContact.properties.website_file_download + ';' + title : title;
+        const website_file_download = existingContact.properties.website_file_download ? existingContact.properties.website_file_download + '; ' + title : title;
         const updateContactRequest = await hubspotClient.apiRequest({
             method: 'PATCH',
             path: `/crm/v3/objects/contacts/${existingContact.id}`,
