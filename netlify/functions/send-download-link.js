@@ -1,6 +1,9 @@
 const postmark = require("postmark");
 const { google } = require("googleapis");
 const mailchimp = require("@mailchimp/mailchimp_marketing");
+const hubspot = require('@hubspot/api-client')
+const validator = require("email-validator");
+
 
 const md5 = require("blueimp-md5");
 const dayjs = require('dayjs')
@@ -14,19 +17,32 @@ exports.handler = async function (event, context) {
     console.log('Request from ' + IP);
 
     try {
+
+        if (!validator.validate(email)) {
+            throw new Error('Invalid email address: ' + email);
+        }
+        
+        let errors = [];
+        
         await sendEmail({url, title, email});
 
-        const [resultofRecordDownloadRequest, resultOfAddSubscriberToMailChimp] = await Promise.all([
+        
+        const [resultofRecordDownloadRequest, resultOfAddSubscriberToMailChimp, resultOfAddSubscriberToHubspot] = await Promise.all([
                 recordDownloadRequest({ url, title, email, IP, isMobile }).then(result => ({ result })).catch(error => ({ error })),
-                addSubscriberToMailChimp(email).then(result => ({ result })).catch(error => ({ error }))
+                addSubscriberToMailChimp(email).then(result => ({ result })).catch(error => ({ error })),
+                addSubscriberToHubspot({email, title}).then(result => ({ result })).catch(error => ({ error }))
             ]);
-        let errors = [];
         if (resultofRecordDownloadRequest.error) {
             errors.push({message: 'Error logging download request to Google Sheet', error: resultofRecordDownloadRequest.error});
         }
         if (resultOfAddSubscriberToMailChimp.error) {
             errors.push({ message: 'Error sending to MC', error: resultOfAddSubscriberToMailChimp.error});
         }
+
+        if (resultOfAddSubscriberToHubspot.error) {
+            errors.push({ message: 'Error sending to HS', error: resultOfAddSubscriberToHubspot.error});
+        }
+        
         if (errors.length) {
             await logError('Email sent but other errors occured', errors)
             return respondWith({message: 'Email sent but other errors occured', errors}); 
@@ -94,7 +110,7 @@ async function appendGoogleSheet(sheet, dataInRows, spreadsheetId = "15gByrg3FKL
     });
     const sheets = google.sheets({ version: 'v4', auth });
 
-    console.log('dataInRows', dataInRows);
+    // console.log('dataInRows', dataInRows);
 
     return await sheets.spreadsheets.values.append({
         spreadsheetId,
@@ -151,6 +167,57 @@ async function addSubscriberToMailChimp(email) {
     // console.log(response.json());
 
     return response;
+
+}
+
+async function addSubscriberToHubspot({email, title}) {
+
+    console.log("Adding email to Hubspot", email);
+
+    try {
+    
+    const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_KEY })
+
+    const getContactRequest = await hubspotClient.apiRequest({
+            method: 'GET',
+            path: `/crm/v3/objects/contacts/${email}`,
+            qs: {
+                idProperty: 'email',
+                properties: 'website_file_download'
+            }
+        });
+
+    if (getContactRequest.statusText === 'OK') {
+        console.log('Updating existing Hubspot record with new download');
+        const existingContact = await getContactRequest.json();
+        const website_file_download = existingContact.properties.website_file_download ? existingContact.properties.website_file_download + ';' + title : title;
+        const updateContactRequest = await hubspotClient.apiRequest({
+            method: 'PATCH',
+            path: `/crm/v3/objects/contacts/${existingContact.id}`,
+            body: { 
+                properties: { website_file_download}
+            }
+        });
+    } else {
+        console.log('Creating new Hubspot record');
+        const createContactRequest = await hubspotClient.apiRequest({
+            method: 'POST',
+            path: `/crm/v3/objects/contacts/`,
+            body: {
+                properties: {
+                    email,
+                    website_file_download: title
+                }
+            }
+        });
+    }
+
+    } catch (e) {
+        console.error(e);
+        throw (e);
+    }
+    
+    return true;
 
 }
 

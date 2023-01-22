@@ -15,9 +15,12 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.1",
+    "@hubspot/api-client": "^8.4.1",
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "blueimp-md5": "^2.19.0",
     "dayjs": "^1.11.6",
+    "email-validator": "^2.0.4",
+    "fetch": "^1.1.0",
     "googleapis": "^109.0.1",
     "i": "^0.3.7",
     "node-fetch": "^3.3.0",
