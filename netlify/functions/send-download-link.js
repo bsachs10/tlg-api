@@ -26,7 +26,6 @@ exports.handler = async function (event, context) {
         
         await sendEmail({url, title, email});
 
-        
         const [resultofRecordDownloadRequest, resultOfAddSubscriberToMailChimp, resultOfAddSubscriberToHubspot] = await Promise.all([
                 recordDownloadRequest({ url, title, email, IP, isMobile }).then(result => ({ result })).catch(error => ({ error })),
                 addSubscriberToMailChimp(email).then(result => ({ result })).catch(error => ({ error })),
@@ -176,7 +175,7 @@ async function addSubscriberToHubspot({email, title}) {
 
     try {
     
-    const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_KEY })
+    const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_KEY });
 
     const getContactRequest = await hubspotClient.apiRequest({
             method: 'GET',
@@ -195,7 +194,9 @@ async function addSubscriberToHubspot({email, title}) {
             method: 'PATCH',
             path: `/crm/v3/objects/contacts/${existingContact.id}`,
             body: { 
-                properties: { website_file_download}
+                properties: { 
+                    website_file_download
+                }
             }
         });
     } else {
@@ -206,7 +207,11 @@ async function addSubscriberToHubspot({email, title}) {
             body: {
                 properties: {
                     email,
-                    website_file_download: title
+                    website_file_download: title,
+                    lifecyclestage: 'marketingqualifiedlead', // aka 'Prospect'
+                    hs_lead_status: 'NEW',
+                    source: 'All Rise Toolkit Download',
+
                 }
             }
         });
